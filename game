@@ -1,0 +1,216 @@
+import pygame
+pygame.init()
+from random import randint
+
+pygame.mixer.init()
+shot_sound = pygame.mixer.Sound("fire.ogg")
+pygame.mixer.music.load("space.ogg")
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1)
+
+window = pygame.display.set_mode((800,600))
+
+font = pygame.font.Font(None,30)
+font2 = pygame.font.Font(None,50)
+font3 = pygame.font.Font(None, 120)
+
+score = 0
+skip = 0
+live = 3
+
+lives = pygame.Rect(650,550,50,50)
+lives2 = pygame.Rect(675,550,50,50)
+lives3 = pygame.Rect(700,550,50,50)
+lives_image = pygame.image.load("heart.png")
+lives_image = pygame.transform.scale(lives_image,(50,50))
+
+player = pygame.Rect(200,500,70,100)
+player_image  = pygame.image.load("rocket.png")
+player_image =  pygame.transform.scale(player_image,(70,100))
+
+background_image  = pygame.image.load("galaxy.jpg")
+background_image =  pygame.transform.scale(background_image,(800,600))
+
+
+asteroid = pygame.Rect(randint(0,250),-300,40,40)
+asteroid2 = pygame.Rect(randint(250,500),-300,40,40)
+asteroid3 = pygame.Rect(randint(500,800),-300,40,40)
+asteroid_image = pygame.image.load("asteroid.png")
+asteroid_image = pygame.transform.scale(asteroid_image,(40,40))
+
+enemy = pygame.Rect(-150,100,100,100)
+enemy3 = pygame.Rect(650,175,100,100)
+enemy4 = pygame.Rect(-150,250,100,100)
+enemy2 = pygame.Rect(650,325,100,100)
+enemy5 = pygame.Rect(650,400,100,100)
+enemy_image = pygame.image.load("ufo.png")
+enemy_image = pygame.transform.scale(enemy_image,(120,80))
+
+bullets4 = []
+
+game = True
+while game:
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            game = False
+        if e.type == pygame.KEYDOWN:
+            if e.key == pygame.K_UP:
+                bullet = pygame.Rect(player.centerx,player.centery,7,24)
+                bullets4.append(bullet)
+                shot_sound.play()
+    
+    text = font.render("Рахунок:",True, (255,255,255))
+    text2 = font.render(str(score),True,(255,255,255))
+    text4 = font.render("Пропущено:", True, (255,255,255))
+    text5 = font.render(str(skip),True,(255,255,255))
+    text6 = font3.render("ПРОГРАШ",True,(255,255,255))
+
+    window.blit(background_image, (0,0))
+    window.blit(player_image, player)
+    window.blit(lives_image,lives )
+    window.blit(lives_image,lives2)
+    window.blit(lives_image,lives3)
+    window.blit(asteroid_image,asteroid )
+    window.blit(asteroid_image,asteroid2)
+    window.blit(asteroid_image,asteroid3)
+    window.blit(enemy_image,enemy )
+    window.blit(enemy_image,enemy2)
+    window.blit(enemy_image,enemy3)
+    window.blit(enemy_image,enemy4)
+    window.blit(enemy_image,enemy5)
+    
+    window.blit(text, (30,50)) 
+    window.blit(text2,(120,50))
+    window.blit(text4, (30,70))
+    window.blit(text5, (160,70))
+    
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_a]:
+        player.x -= 5
+    if keys[pygame.K_d]:
+        player.x += 5
+        
+    asteroid.y += randint(6,10)
+    asteroid2.y += randint(9,17)
+    if asteroid.y >= 650:
+        asteroid.y = -100
+        asteroid.x = (randint(0,250))
+
+    if asteroid2.y >= 650:
+        asteroid2.y = -100
+        asteroid2.x = (randint(250,800))
+
+    enemy.x += randint(5,10)
+    if enemy.x >= 950:
+        enemy.x = -150
+    
+    enemy2.x -= randint(3,10)
+    if enemy2.x <= -100:
+        enemy2.x = 950
+        
+    enemy3.x -= randint(3,10)
+    if enemy3.x <= -100:
+        enemy3.x = 950  
+
+    enemy4.x += randint(6,10)
+    if enemy4.x >= 950:
+        enemy4.x = -150
+
+    enemy5.x -= randint(5,9)
+    if enemy5.x <= -100:
+        enemy5.x = 950
+
+    if player.x <= 0:
+        player.x += 5
+    if player.x >= 730:
+        player.x -= 5
+
+    if player.colliderect(asteroid) or player.colliderect(asteroid2):
+        live -= 1
+        asteroid.x  = randint(0,400)
+        asteroid.y  = -100
+        asteroid2.x = randint(400,800)
+        asteroid2.y  = -100
+    
+    if enemy.x >= 948:
+        skip += 1
+    
+    if enemy2.x >= 948:
+        skip += 1
+
+    if enemy3.x >= 948:
+        skip += 1
+    
+    if enemy4.x <= -148:
+        skip += 1
+    
+    if enemy5.x >= 948:
+        skip += 1
+        
+    if skip == 50:
+        window.blit(text6, ())
+
+    if live == 2:
+        lives.x = 1000
+    elif live == 1:
+        lives2.x = 1000
+
+    elif live == 0:
+        lives3.x = 1000
+        window.blit(text6, (150,275))
+        pygame.display.update()  #оновлення екрану перед затримкою
+        pygame.time.delay(3000)  # затримка 3 секунди (3000 мілісекунд)
+        game = False
+
+    if score >= 5:
+        enemy.x += 6
+    if score >= 10:
+        enemy2.x -= 6
+    if score >= 15:
+        enemy3.x -= 6
+    if score >= 20:
+        enemy4.x += 6
+    if score >= 25: 
+        enemy.x += 10
+        if bullet.colliderect(enemy):
+            enemy.x = -550
+            score += 10
+        enemy2.y = 1000
+        enemy3.y = 1000
+        enemy4.y = 1000
+        enemy5.y = 1000
+    
+    if score >= 55:
+        asteroid.y += 5
+        asteroid2.y += 5
+        enemy.x += 5
+
+    if score >= 75:
+        text3 = font2.render("ПОСМАКУЄМ ПЕРЕМОГУ",True, (255,255,255))
+        window.blit(text3,(150,275))
+        enemy.y = 1000
+        asteroid.x = 1000
+        asteroid2.x = 1000
+    
+
+    for b in bullets4:
+        pygame.draw.rect(window,(255,0,0),b)
+        b.y -= 10
+        if bullet.colliderect(enemy):
+            enemy.x = -550
+            score += 100  # щоб зразу провірити кінець
+        elif bullet.colliderect(enemy2):
+            enemy2.x = 1050
+            score += 1
+        elif bullet.colliderect(enemy3):
+            enemy3.x = 1050
+            score += 1  
+        elif bullet.colliderect(enemy4):
+            enemy4.x = -550
+            score += 1
+        elif bullet.colliderect(enemy5):
+            enemy5.x = 1050  
+            score += 1
+
+    pygame.display.update()
+    pygame.time.Clock().tick(60)
